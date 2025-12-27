@@ -43,6 +43,47 @@ class _QuoteViewState extends State<QuoteView> {
     }
   }
 
+  Future<void> _acceptQuote(String quoteId) async {
+    try {
+      await _apiService.acceptQuote(quoteId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Quote accepted successfully!'),
+              ],
+            ),
+            backgroundColor: AppConstants.successColor,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Refresh the list
+        _loadBookings();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('Failed to accept quote: $e'),
+                ),
+              ],
+            ),
+            backgroundColor: AppConstants.errorColor,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,7 +160,10 @@ class _QuoteViewState extends State<QuoteView> {
                         itemCount: _bookings.length,
                         itemBuilder: (context, index) {
                           final booking = _bookings[index];
-                          return _QuoteCard(booking: booking);
+                          return _QuoteCard(
+                            booking: booking,
+                            onAccept: () => _acceptQuote(booking.id),
+                          );
                         },
                       ),
                     ),
@@ -127,13 +171,41 @@ class _QuoteViewState extends State<QuoteView> {
   }
 }
 
-class _QuoteCard extends StatelessWidget {
+class _QuoteCard extends StatefulWidget {
   final Shipment booking;
+  final Future<void> Function() onAccept;
 
-  const _QuoteCard({required this.booking});
+  const _QuoteCard({
+    required this.booking,
+    required this.onAccept,
+  });
+
+  @override
+  State<_QuoteCard> createState() => _QuoteCardState();
+}
+
+class _QuoteCardState extends State<_QuoteCard> {
+  bool _isAccepting = false;
+
+  Future<void> _handleAccept() async {
+    setState(() => _isAccepting = true);
+    try {
+      await widget.onAccept();
+    } finally {
+      if (mounted) {
+        setState(() => _isAccepting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final booking = widget.booking;
+    final canAccept = booking.status == 'quoted' && 
+                      (booking.quoteStatus == null || 
+                       booking.quoteStatus!.toLowerCase() == 'requested' ||
+                       booking.quoteStatus!.toLowerCase() == 'quoted');
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -354,6 +426,37 @@ class _QuoteCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ],
+            
+            // Accept Button
+            if (canAccept) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isAccepting ? null : _handleAccept,
+                  icon: _isAccepting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.check_circle),
+                  label: Text(_isAccepting ? 'Accepting...' : 'Accept Quote'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppConstants.successColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
                 ),
               ),
             ],

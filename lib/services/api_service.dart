@@ -77,28 +77,6 @@ class ApiService {
     }
   }
 
-  Future<void> acceptQuote(String quoteId) async {
-    final headers = await _getHeaders();
-    
-    final uri = Uri.parse('$baseUrl/quotes/$quoteId/accept');
-    final httpRequest = http.Request('POST', uri);
-    httpRequest.headers.addAll(headers);
-    httpRequest.headers['Accept'] = 'application/json';
-    
-    final streamedResponse = await httpRequest.send();
-    final response = await http.Response.fromStream(streamedResponse);
-    
-    if (response.statusCode != 200) {
-      final errorBody = response.body.isNotEmpty 
-          ? json.decode(response.body) 
-          : <String, dynamic>{};
-      final errorMessage = errorBody['detail'] ?? 
-                          errorBody['message'] ?? 
-                          'Failed to accept quote';
-      throw Exception(errorMessage);
-    }
-  }
-
   Future<List<Shipment>> getForwarderShipments() async {
     final headers = await _getHeaders();
     final response = await http.get(
@@ -171,6 +149,29 @@ class ApiService {
       return data.map((item) => Shipment.fromJson(item)).toList();
     } else {
       return [];
+    }
+  }
+
+  Future<void> acceptQuote(String quoteId) async {
+    final headers = await _getHeaders();
+    
+    final uri = Uri.parse('$baseUrl/carriers/acceptQuote');
+    final httpRequest = http.Request('POST', uri);
+    httpRequest.headers.addAll(headers);
+    httpRequest.headers['Accept'] = 'application/json';
+    httpRequest.body = json.encode({'quote_id': quoteId});
+    
+    final streamedResponse = await httpRequest.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      final errorBody = response.body.isNotEmpty 
+          ? json.decode(response.body) 
+          : <String, dynamic>{};
+      final errorMessage = errorBody['detail'] ?? 
+                          errorBody['message'] ?? 
+                          'Failed to accept quote';
+      throw Exception(errorMessage);
     }
   }
 
