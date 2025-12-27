@@ -97,16 +97,11 @@ class ApiService {
     }
   }
 
-  Future<void> submitForwarderQuote(String shipmentNumber, Map<String, dynamic> quoteData) async {
-    // Include shipment_number in the request body
-    final requestBodyData = {
-      'shipment_number': shipmentNumber,
-      ...quoteData,
-    };
-    final requestBody = json.encode(requestBodyData);
+  Future<void> submitForwarderQuote(String shipmentId, Map<String, dynamic> quoteData) async {
+    final requestBody = json.encode(quoteData);
     final headers = await _getHeaders();
     
-    final uri = Uri.parse('$baseUrl/forwarder/request-accept');
+    final uri = Uri.parse('$baseUrl/forwarder/request-accept/$shipmentId');
     final httpRequest = http.Request('PUT', uri);
     httpRequest.headers.addAll(headers);
     httpRequest.headers['Accept'] = 'application/json';
@@ -171,6 +166,33 @@ class ApiService {
       final errorMessage = errorBody['detail'] ?? 
                           errorBody['message'] ?? 
                           'Failed to accept quote';
+      throw Exception(errorMessage);
+    }
+  }
+
+  Future<List<Shipment>> getAcceptedQuotes() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$baseUrl/forwarder/accepted-quotes'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      // Handle wrapped {"data": [...]} response
+      List data = responseData is Map && responseData.containsKey('data') 
+          ? responseData['data'] 
+          : responseData is List 
+              ? responseData 
+              : [];
+      return data.map((item) => Shipment.fromJson(item)).toList();
+    } else {
+      final errorBody = response.body.isNotEmpty 
+          ? json.decode(response.body) 
+          : <String, dynamic>{};
+      final errorMessage = errorBody['reason'] ?? 
+                          errorBody['detail'] ?? 
+                          errorBody['message'] ?? 
+                          'Failed to load accepted quotes';
       throw Exception(errorMessage);
     }
   }

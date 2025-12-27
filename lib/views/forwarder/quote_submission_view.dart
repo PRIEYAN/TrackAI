@@ -242,9 +242,7 @@ class _QuoteSubmissionViewState extends State<QuoteSubmissionView> {
         'quote_extra': _remarksController.text.isEmpty ? null : _remarksController.text,
       };
 
-      // Use shipment_number for the API call (not MongoDB _id)
-      final shipmentNumber = widget.shipment.shipmentNumber;
-      await _apiService.submitForwarderQuote(shipmentNumber, quoteData);
+      await _apiService.submitForwarderQuote(widget.shipment.id, quoteData);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

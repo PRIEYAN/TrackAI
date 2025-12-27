@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../core/constants.dart';
 import '../../services/api_service.dart';
 import '../../models/models.dart';
 
-class QuoteView extends StatefulWidget {
-  const QuoteView({super.key});
+class AcceptedRequestsView extends StatefulWidget {
+  const AcceptedRequestsView({super.key});
 
   @override
-  State<QuoteView> createState() => _QuoteViewState();
+  State<AcceptedRequestsView> createState() => _AcceptedRequestsViewState();
 }
 
-class _QuoteViewState extends State<QuoteView> {
+class _AcceptedRequestsViewState extends State<AcceptedRequestsView> {
   final ApiService _apiService = ApiService();
-  List<Shipment> _bookings = [];
+  List<Shipment> _acceptedQuotes = [];
   bool _isLoading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _loadBookings();
+    _loadAcceptedQuotes();
   }
 
-  Future<void> _loadBookings() async {
+  Future<void> _loadAcceptedQuotes() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      final bookings = await _apiService.getBookings();
+      final quotes = await _apiService.getAcceptedQuotes();
       setState(() {
-        _bookings = bookings;
+        _acceptedQuotes = quotes;
         _isLoading = false;
       });
     } catch (e) {
@@ -43,54 +42,20 @@ class _QuoteViewState extends State<QuoteView> {
     }
   }
 
-  Future<void> _acceptQuote(String quoteId) async {
-    try {
-      await _apiService.acceptQuote(quoteId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Text('Quote accepted successfully!'),
-              ],
-            ),
-            backgroundColor: AppConstants.successColor,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Refresh the list
-        _loadBookings();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Failed to accept quote: $e'),
-                ),
-              ],
-            ),
-            backgroundColor: AppConstants.errorColor,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
+      backgroundColor: AppConstants.forwarderBackground,
       appBar: AppBar(
-        title: const Text('Quotes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: AppConstants.primaryColor,
+        title: const Text(
+          'Accepted Requests',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppConstants.forwarderOrange,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
           IconButton(
             icon: _isLoading
@@ -103,7 +68,7 @@ class _QuoteViewState extends State<QuoteView> {
                     ),
                   )
                 : const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _isLoading ? null : _loadBookings,
+            onPressed: _isLoading ? null : _loadAcceptedQuotes,
           ),
         ],
       ),
@@ -123,47 +88,45 @@ class _QuoteViewState extends State<QuoteView> {
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton.icon(
-                        onPressed: _loadBookings,
+                        onPressed: _loadAcceptedQuotes,
                         icon: const Icon(Icons.refresh),
                         label: const Text('Retry'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
+                          backgroundColor: AppConstants.forwarderOrange,
                           foregroundColor: Colors.white,
                         ),
                       ),
                     ],
                   ),
                 )
-              : _bookings.isEmpty
+              : _acceptedQuotes.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[400]),
+                          Icon(Icons.check_circle_outline, size: 64, color: Colors.grey[400]),
                           const SizedBox(height: 16),
                           Text(
-                            'No quotes found',
+                            'No accepted requests',
                             style: TextStyle(color: Colors.grey[600], fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Your quotes will appear here',
+                            'Accepted quotes will appear here',
                             style: TextStyle(color: Colors.grey[500], fontSize: 14),
                           ),
                         ],
                       ),
                     )
                   : RefreshIndicator(
-                      onRefresh: _loadBookings,
+                      onRefresh: _loadAcceptedQuotes,
+                      color: AppConstants.forwarderOrange,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: _bookings.length,
+                        itemCount: _acceptedQuotes.length,
                         itemBuilder: (context, index) {
-                          final booking = _bookings[index];
-                          return _QuoteCard(
-                            booking: booking,
-                            onAccept: () => _acceptQuote(booking.id),
-                          );
+                          final quote = _acceptedQuotes[index];
+                          return _AcceptedQuoteCard(quote: quote);
                         },
                       ),
                     ),
@@ -171,42 +134,13 @@ class _QuoteViewState extends State<QuoteView> {
   }
 }
 
-class _QuoteCard extends StatefulWidget {
-  final Shipment booking;
-  final Future<void> Function() onAccept;
+class _AcceptedQuoteCard extends StatelessWidget {
+  final Shipment quote;
 
-  const _QuoteCard({
-    required this.booking,
-    required this.onAccept,
-  });
-
-  @override
-  State<_QuoteCard> createState() => _QuoteCardState();
-}
-
-class _QuoteCardState extends State<_QuoteCard> {
-  bool _isAccepting = false;
-
-  Future<void> _handleAccept() async {
-    setState(() => _isAccepting = true);
-    try {
-      await widget.onAccept();
-    } finally {
-      if (mounted) {
-        setState(() => _isAccepting = false);
-      }
-    }
-  }
+  const _AcceptedQuoteCard({required this.quote});
 
   @override
   Widget build(BuildContext context) {
-    final booking = widget.booking;
-    final canAccept = booking.status == 'quoted' && 
-                      (booking.quoteStatus == null || 
-                       booking.quoteStatus!.toLowerCase() == 'requested' ||
-                       booking.quoteStatus!.toLowerCase() == 'quoted' ||
-                       booking.quoteStatus!.toLowerCase() == 'accepted');
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -235,16 +169,16 @@ class _QuoteCardState extends State<_QuoteCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        booking.shipmentNumber,
+                        quote.shipmentNumber,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppConstants.primaryColor,
+                          color: AppConstants.forwarderOrange,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Created: ${_formatDate(booking.createdAt)}',
+                        'Created: ${_formatDate(quote.createdAt)}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -253,33 +187,102 @@ class _QuoteCardState extends State<_QuoteCard> {
                     ],
                   ),
                 ),
-                if (booking.quoteStatus != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getQuoteStatusColor(booking.quoteStatus!).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: _getQuoteStatusColor(booking.quoteStatus!)),
-                    ),
-                    child: Text(
-                      booking.quoteStatus!.toUpperCase(),
-                      style: TextStyle(
-                        color: _getQuoteStatusColor(booking.quoteStatus!),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppConstants.successColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppConstants.successColor),
+                  ),
+                  child: const Text(
+                    'ACCEPTED',
+                    style: TextStyle(
+                      color: AppConstants.successColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
+            
+            // Supplier Information
+            if (quote.supplierDetails != null) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppConstants.primaryColor.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppConstants.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppConstants.primaryColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Supplier',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            quote.supplierDetails!['name'] ?? 'N/A',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (quote.supplierDetails!['phone'] != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(Icons.phone, size: 14, color: Colors.grey[600]),
+                                const SizedBox(width: 4),
+                                Text(
+                                  quote.supplierDetails!['phone'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             
             // Route Information
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppConstants.backgroundColor,
+                color: AppConstants.forwarderBackground,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppConstants.forwarderOrange.withOpacity(0.2)),
               ),
               child: Row(
                 children: [
@@ -287,7 +290,7 @@ class _QuoteCardState extends State<_QuoteCard> {
                     child: _buildRouteItem(
                       Icons.location_on,
                       'Origin',
-                      booking.originPort,
+                      quote.originPort,
                     ),
                   ),
                   Container(
@@ -299,7 +302,7 @@ class _QuoteCardState extends State<_QuoteCard> {
                     child: _buildRouteItem(
                       Icons.location_on,
                       'Destination',
-                      booking.destinationPort,
+                      quote.destinationPort,
                     ),
                   ),
                 ],
@@ -308,21 +311,21 @@ class _QuoteCardState extends State<_QuoteCard> {
             const SizedBox(height: 16),
             
             // Quote Details
-            if (booking.quoteAmount != null) ...[
+            if (quote.quoteAmount != null) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppConstants.primaryColor.withOpacity(0.1),
-                      AppConstants.accentColor.withOpacity(0.1),
+                      AppConstants.forwarderOrange.withOpacity(0.1),
+                      AppConstants.forwarderOrangeLight.withOpacity(0.1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppConstants.primaryColor.withOpacity(0.2),
+                    color: AppConstants.forwarderOrange.withOpacity(0.2),
                   ),
                 ),
                 child: Row(
@@ -341,16 +344,16 @@ class _QuoteCardState extends State<_QuoteCard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '\$${booking.quoteAmount!.toStringAsFixed(2)}',
+                          '\$${quote.quoteAmount!.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: AppConstants.primaryColor,
+                            color: AppConstants.forwarderOrange,
                           ),
                         ),
                       ],
                     ),
-                    if (booking.quoteTime != null)
+                    if (quote.quoteTime != null)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -364,7 +367,7 @@ class _QuoteCardState extends State<_QuoteCard> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _formatDate(booking.quoteTime!),
+                            _formatDate(quote.quoteTime!),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -383,26 +386,36 @@ class _QuoteCardState extends State<_QuoteCard> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (booking.grossWeightKg != null)
+                if (quote.grossWeightKg != null)
                   _buildInfoChip(
                     Icons.scale,
-                    'Weight: ${booking.grossWeightKg!.toStringAsFixed(1)} kg',
+                    'Weight: ${quote.grossWeightKg!.toStringAsFixed(1)} kg',
                   ),
-                if (booking.volumeCbm != null)
+                if (quote.volumeCbm != null)
                   _buildInfoChip(
                     Icons.inventory_2,
-                    'Volume: ${booking.volumeCbm!.toStringAsFixed(1)} CBM',
+                    'Volume: ${quote.volumeCbm!.toStringAsFixed(1)} CBM',
                   ),
-                if (booking.cargoType != null)
+                if (quote.cargoType != null)
                   _buildInfoChip(
                     Icons.category,
-                    'Cargo: ${booking.cargoType}',
+                    'Cargo: ${quote.cargoType}',
+                  ),
+                if (quote.containerType != null)
+                  _buildInfoChip(
+                    Icons.square_foot,
+                    'Container: ${quote.containerType}',
+                  ),
+                if (quote.containerQty != null)
+                  _buildInfoChip(
+                    Icons.numbers,
+                    'Qty: ${quote.containerQty}',
                   ),
               ],
             ),
             
             // Quote Extra Notes
-            if (booking.quoteExtra != null && booking.quoteExtra!.isNotEmpty) ...[
+            if (quote.quoteExtra != null && quote.quoteExtra!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -418,7 +431,7 @@ class _QuoteCardState extends State<_QuoteCard> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        booking.quoteExtra!,
+                        quote.quoteExtra!,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[800],
@@ -427,37 +440,6 @@ class _QuoteCardState extends State<_QuoteCard> {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
-            
-            // Accept Button
-            if (canAccept) ...[
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isAccepting ? null : _handleAccept,
-                  icon: _isAccepting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.check_circle),
-                  label: Text(_isAccepting ? 'Accepting...' : 'Accept Quote'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.successColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
                 ),
               ),
             ],
@@ -470,7 +452,7 @@ class _QuoteCardState extends State<_QuoteCard> {
   Widget _buildRouteItem(IconData icon, String label, String value) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: AppConstants.primaryColor),
+        Icon(icon, size: 24, color: AppConstants.forwarderOrange),
         const SizedBox(height: 8),
         Text(
           label,
@@ -499,14 +481,14 @@ class _QuoteCardState extends State<_QuoteCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppConstants.accentColor.withOpacity(0.1),
+        color: AppConstants.forwarderOrangeLight.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppConstants.accentColor.withOpacity(0.3)),
+        border: Border.all(color: AppConstants.forwarderOrangeLight.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: AppConstants.accentColor),
+          Icon(icon, size: 14, color: AppConstants.forwarderOrange),
           const SizedBox(width: 6),
           Text(
             label,
@@ -521,20 +503,8 @@ class _QuoteCardState extends State<_QuoteCard> {
     );
   }
 
-  Color _getQuoteStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'accepted':
-        return AppConstants.successColor;
-      case 'pending':
-        return Colors.orange;
-      case 'rejected':
-        return AppConstants.errorColor;
-      default:
-        return AppConstants.accentColor;
-    }
-  }
-
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
+

@@ -7,6 +7,7 @@ import '../../models/models.dart';
 import '../../services/api_service.dart';
 import '../../views/auth/login_screen.dart';
 import 'quote_submission_view.dart';
+import 'accepted_requests_view.dart';
 
 class ForwarderDashboard extends StatefulWidget {
   const ForwarderDashboard({super.key});
@@ -135,10 +136,13 @@ class _ForwarderDashboardState extends State<ForwarderDashboard> {
           ),
           ListTile(
             leading: const Icon(Icons.assignment, color: AppConstants.forwarderOrange),
-            title: const Text('Accepted Requets'),
+            title: const Text('Accepted Requests'),
             onTap: () {
               Navigator.pop(context);
-              // Navigate to quotes page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AcceptedRequestsView()),
+              );
             },
           ),
           ListTile(

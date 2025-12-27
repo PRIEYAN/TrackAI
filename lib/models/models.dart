@@ -24,6 +24,8 @@ class Shipment {
   final List<String>? quoteForwarderId;
   final String? quoteStatus;
   final DateTime? quoteTime;
+  // Supplier details (for forwarder accepted requests)
+  final Map<String, dynamic>? supplierDetails;
 
   Shipment({
     required this.id,
@@ -50,6 +52,7 @@ class Shipment {
     this.quoteForwarderId,
     this.quoteStatus,
     this.quoteTime,
+    this.supplierDetails,
   });
 
   factory Shipment.fromJson(Map<String, dynamic> json) {
@@ -95,6 +98,9 @@ class Shipment {
       quoteStatus: json['quote_status'],
       quoteTime: json['quote_time'] != null 
           ? DateTime.parse(json['quote_time']) 
+          : null,
+      supplierDetails: json['supplier_details'] != null
+          ? Map<String, dynamic>.from(json['supplier_details'])
           : null,
     );
   }

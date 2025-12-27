@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String baseUrl = 'https://530b804258fd.ngrok-free.app/api'; // Update for production
+  static const String baseUrl = 'https://cfca903e17c7.ngrok-free.app/api'; // Update for production
   
   // Theme Colors
   static const Color primaryColor = Color(0xFF1E3A8A); // Deep Blue
