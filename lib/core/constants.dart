@@ -3,12 +3,40 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String baseUrl = 'https://cfca903e17c7.ngrok-free.app/api'; // Update for production
   
-  // Theme Colors
+  // Theme Colors - Enhanced Blue Palette
   static const Color primaryColor = Color(0xFF1E3A8A); // Deep Blue
+  static const Color primaryColorDark = Color(0xFF1E40AF); // Darker Blue
+  static const Color primaryColorLight = Color(0xFF3B82F6); // Bright Blue
   static const Color accentColor = Color(0xFF3B82F6); // Bright Blue
+  static const Color accentColorLight = Color(0xFF60A5FA); // Light Blue
+  static const Color accentColorDark = Color(0xFF2563EB); // Dark Accent Blue
   static const Color successColor = Color(0xFF10B981); // Emerald
   static const Color errorColor = Color(0xFFEF4444); // Red
-  static const Color backgroundColor = Color(0xFFF3F4F6); // Light Gray
+  static const Color backgroundColor = Color(0xFFF8FAFC); // Light Blue-Gray
+  static const Color surfaceColor = Color(0xFFFFFFFF); // White
+  static const Color cardBackground = Color(0xFFFFFFFF); // White
+  static const Color textPrimary = Color(0xFF1E293B); // Dark Slate
+  static const Color textSecondary = Color(0xFF64748B); // Slate Gray
+  static const Color dividerColor = Color(0xFFE2E8F0); // Light Blue Gray
+  
+  // Blue Gradients
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient accentGradient = LinearGradient(
+    colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient cardGradient = LinearGradient(
+    colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
   
   // Forwarder Orange Theme
   static const Color forwarderOrange = Color(0xFFFF6B35); // Primary Orange

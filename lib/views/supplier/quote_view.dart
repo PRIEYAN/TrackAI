@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants.dart';
 import '../../services/api_service.dart';
 import '../../models/models.dart';
+import 'payment_gateway_popup.dart';
 
 class QuoteView extends StatefulWidget {
   const QuoteView({super.key});
@@ -47,41 +48,23 @@ class _QuoteViewState extends State<QuoteView> {
     try {
       await _apiService.acceptQuote(quoteId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Text('Quote accepted successfully!'),
-              ],
-            ),
-            backgroundColor: AppConstants.successColor,
-            duration: Duration(seconds: 2),
-          ),
-        );
         // Refresh the list
         _loadBookings();
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Failed to accept quote: $e'),
-                ),
-              ],
-            ),
-            backgroundColor: AppConstants.errorColor,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      rethrow; // Re-throw to handle in payment popup
     }
+  }
+
+  void _showPaymentGateway(Shipment shipment) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PaymentGatewayPopup(
+        shipment: shipment,
+        onPay: () => _acceptQuote(shipment.id),
+      ),
+    );
   }
 
   @override
@@ -89,8 +72,14 @@ class _QuoteViewState extends State<QuoteView> {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
-        title: const Text('Quotes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Quotes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         backgroundColor: AppConstants.primaryColor,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppConstants.primaryGradient,
+          ),
+        ),
         actions: [
           IconButton(
             icon: _isLoading
@@ -162,7 +151,7 @@ class _QuoteViewState extends State<QuoteView> {
                           final booking = _bookings[index];
                           return _QuoteCard(
                             booking: booking,
-                            onAccept: () => _acceptQuote(booking.id),
+                            onAccept: () => _showPaymentGateway(booking),
                           );
                         },
                       ),
@@ -173,7 +162,7 @@ class _QuoteViewState extends State<QuoteView> {
 
 class _QuoteCard extends StatefulWidget {
   final Shipment booking;
-  final Future<void> Function() onAccept;
+  final VoidCallback onAccept;
 
   const _QuoteCard({
     required this.booking,
@@ -185,17 +174,8 @@ class _QuoteCard extends StatefulWidget {
 }
 
 class _QuoteCardState extends State<_QuoteCard> {
-  bool _isAccepting = false;
-
-  Future<void> _handleAccept() async {
-    setState(() => _isAccepting = true);
-    try {
-      await widget.onAccept();
-    } finally {
-      if (mounted) {
-        setState(() => _isAccepting = false);
-      }
-    }
+  void _handleAccept() {
+    widget.onAccept();
   }
 
   @override
@@ -210,13 +190,17 @@ class _QuoteCardState extends State<_QuoteCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: AppConstants.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppConstants.dividerColor,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
+            color: AppConstants.primaryColor.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -276,10 +260,21 @@ class _QuoteCardState extends State<_QuoteCard> {
             
             // Route Information
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppConstants.backgroundColor,
-                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    AppConstants.accentColor.withOpacity(0.1),
+                    AppConstants.accentColorLight.withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppConstants.accentColor.withOpacity(0.2),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
@@ -292,8 +287,8 @@ class _QuoteCardState extends State<_QuoteCard> {
                   ),
                   Container(
                     width: 1,
-                    height: 50,
-                    color: Colors.grey[300],
+                    height: 60,
+                    color: AppConstants.dividerColor,
                   ),
                   Expanded(
                     child: _buildRouteItem(
@@ -310,20 +305,28 @@ class _QuoteCardState extends State<_QuoteCard> {
             // Quote Details
             if (booking.quoteAmount != null) ...[
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppConstants.primaryColor.withOpacity(0.1),
-                      AppConstants.accentColor.withOpacity(0.1),
+                      AppConstants.primaryColor.withOpacity(0.15),
+                      AppConstants.accentColor.withOpacity(0.12),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppConstants.primaryColor.withOpacity(0.2),
+                    color: AppConstants.primaryColor.withOpacity(0.3),
+                    width: 1.5,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppConstants.primaryColor.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -437,26 +440,18 @@ class _QuoteCardState extends State<_QuoteCard> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _isAccepting ? null : _handleAccept,
-                  icon: _isAccepting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.check_circle),
-                  label: Text(_isAccepting ? 'Accepting...' : 'Accept Quote'),
+                  onPressed: _handleAccept,
+                  icon: const Icon(Icons.payment_rounded),
+                  label: const Text('Accept Quote'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppConstants.successColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    elevation: 2,
+                    elevation: 4,
+                    shadowColor: AppConstants.successColor.withOpacity(0.4),
                   ),
                 ),
               ),
