@@ -264,6 +264,68 @@ class ApiService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getShipmentDocuments(String shipmentId) async {
+    final token = await AuthStorage.getToken();
+    final headers = {'Content-Type': 'application/json'};
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/documents/shipments/$shipmentId/list'),
+      headers: headers,
+    );
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      List data = responseData is Map && responseData.containsKey('data')
+          ? responseData['data']
+          : responseData is List
+              ? responseData
+              : [];
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      final errorBody = response.body.isNotEmpty
+          ? json.decode(response.body)
+          : <String, dynamic>{};
+      final errorMessage = errorBody['reason'] ??
+          errorBody['detail'] ??
+          errorBody['message'] ??
+          'Failed to load documents';
+      throw Exception(errorMessage);
+    }
+  }
+
+  Future<Map<String, dynamic>> getShipmentInvoice(String shipmentId) async {
+    final token = await AuthStorage.getToken();
+    final headers = {'Content-Type': 'application/json'};
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    
+    final response = await http.get(
+      Uri.parse('$baseUrl/documents/shipments/$shipmentId/invoice'),
+      headers: headers,
+    );
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      Map<String, dynamic> data = responseData is Map && responseData.containsKey('data')
+          ? responseData['data'] as Map<String, dynamic>
+          : responseData as Map<String, dynamic>;
+      return data;
+    } else {
+      final errorBody = response.body.isNotEmpty
+          ? json.decode(response.body)
+          : <String, dynamic>{};
+      final errorMessage = errorBody['reason'] ??
+          errorBody['detail'] ??
+          errorBody['message'] ??
+          'Failed to load invoice';
+      throw Exception(errorMessage);
+    }
+  }
+
   Future<Map<String, dynamic>> uploadInvoice(String shipmentId, String filePath) async {
     final token = await AuthStorage.getToken();
     var request = http.MultipartRequest(
