@@ -244,6 +244,50 @@ graph TB
 - **Route Optimization Engine**: ML-based shortest path and eco-friendly route calculation
 
 ---
+---
+
+## 🧩 Requestly Integration (API Debugging & Traffic Monitoring)
+
+TrackEye AI uses **Requestly** during backend development to:
+
+- Inspect and debug REST API calls
+- Monitor authentication (JWT token) flows
+- Replay shipment workflow requests
+- Mock and test forwarder & carrier APIs
+- Validate request / response payloads
+- Demonstrate end-to-end logistics flows during presentations
+
+Requestly helped us quickly test flows such as:
+
+✔ User Authentication  
+✔ Shipment Creation  
+✔ Forwarder Quote Submission  
+✔ Supplier Quote Acceptance  
+✔ Booking & Status Updates  
+
+### 🔍 Why We Used Requestly
+
+- Eliminates need for UI to test APIs
+- Faster debugging across micro-flows
+- Helps validate role-based authorization
+- Ensures consistent API contracts
+- Makes demo storytelling seamless
+
+### 🧪 APIs Tested Through Requestly
+
+- `/api/auth/login`
+- `/api/shipments/create`
+- `/api/forwarder/request-accept/:id`
+- `/api/carriers/acceptQuote`
+- `/api/tracking/shipments/:id`
+- `/api/documents/upload`
+- `/api/customs/*`
+
+> Requestly played a key role in validating shipment lifecycle automation and accelerating backend development.
+
+---
+
+
 
 ## 🛠️ Tech Stack
 
