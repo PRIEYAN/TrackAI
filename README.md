@@ -460,7 +460,7 @@ Dedicated Flutter application for logistics drivers.
 Flask REST API backend with MongoDB and AI integration.
 
 ### AI Services Repository
-**GitHub**: _To be filled_
+**GitHub**: [https://github.com/monish250507/map](https://github.com/monish250507/map)
 
 ML models and AI services for route optimization and document processing.
 
