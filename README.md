@@ -4,7 +4,8 @@
 
 ### Smart Logistics Platform Powered by AI
 
-![TrackEye AI Logo](https://via.placeholder.com/200x200/1E3A8A/FFFFFF?text=TrackEye+AI)
+<img src="asests/logo.png" alt="TrackEye AI Logo" width="200" height="200">
+
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.10.1-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
@@ -15,7 +16,7 @@
 
 **Revolutionizing logistics with AI-powered route optimization, real-time tracking, and intelligent document processing**
 
-[Features](#-key-features) • [Architecture](#-architecture) • [Installation](#-installation--setup) • [Documentation](#-documentation) • [Team](#-team-yon Kons)
+[Features](#-key-features) • [Architecture](#-architecture) • [Installation](#-installation--setup) • [Screenshots](#-screenshots) • [Team](#-team-yon Kons)
 
 </div>
 
@@ -467,28 +468,50 @@ ML models and AI services for route optimization and document processing.
 
 ## 📸 Screenshots
 
-### Dashboard Views
+### Application Screenshots
 
 <div align="center">
 
-![Dashboard](https://via.placeholder.com/400x800/1E3A8A/FFFFFF?text=Dashboard+View)
-*Supplier Dashboard with shipment overview*
-
-![Shipment Creation](https://via.placeholder.com/400x800/3B82F6/FFFFFF?text=Create+Shipment)
-*Create new shipment with document upload*
-
-![Driver App](https://via.placeholder.com/400x800/22C55E/FFFFFF?text=Driver+Dashboard)
-*Driver mobile app with job management*
-
-![Tracking](https://via.placeholder.com/400x800/FF6B35/FFFFFF?text=Live+Tracking)
-*Real-time shipment tracking with map*
-
-![AI Processing](https://via.placeholder.com/400x800/4285F4/FFFFFF?text=AI+Document+Extraction)
-*AI-powered document extraction interface*
+<table>
+<tr>
+<td align="center">
+<img src="asests/main.jpeg" alt="Main Dashboard" width="300"/>
+<br />
+<strong>Main Dashboard</strong><br />
+<em>TrackEye AI Home Screen</em>
+</td>
+<td align="center">
+<img src="asests/sup.jpeg" alt="Supplier View" width="300"/>
+<br />
+<strong>Supplier Dashboard</strong><br />
+<em>Supplier interface with shipment management</em>
+</td>
+</tr>
+<tr>
+<td align="center">
+<img src="asests/for.jpeg" alt="Forwarder View" width="300"/>
+<br />
+<strong>Forwarder Portal</strong><br />
+<em>Forwarder dashboard and quote management</em>
+</td>
+<td align="center">
+<img src="asests/cship.jpeg" alt="Create Shipment" width="300"/>
+<br />
+<strong>Create Shipment</strong><br />
+<em>Shipment creation with document upload</em>
+</td>
+</tr>
+<tr>
+<td align="center" colspan="2">
+<img src="asests/reqac.jpeg" alt="Request & Accept" width="300"/>
+<br />
+<strong>Request & Accept</strong><br />
+<em>Quote requests and acceptance workflow</em>
+</td>
+</tr>
+</table>
 
 </div>
-
-> **Note**: Replace placeholder images with actual screenshots from your application.
 
 ---
 
@@ -496,56 +519,60 @@ ML models and AI services for route optimization and document processing.
 
 <div align="center">
 
-### Meet the Team Behind TrackEye AI
+### 🚀 Meet the Innovators Behind **TrackEye AI**
+
+<br>
 
 <table>
 <tr>
+
 <td align="center">
-<img src="https://via.placeholder.com/150/1E3A8A/FFFFFF?text=PR" width="120" height="120" style="border-radius:50%"/>
-<br />
-<strong>Poornima R</strong><br />
-<em>Team Lead</em><br />
-<a href="https://github.com/poornima2006188">🔗 GitHub</a> • 
-<a href="https://linkedin.com/in/poornima-r">💼 LinkedIn</a>
+<strong>Poornima R</strong><br/>
+<em>Team Lead — Product & Strategy</em><br/>
+<a href="https://github.com/poornima2006188">🔗 GitHub</a> |
+<a href="https://www.linkedin.com/in/poornima-r-a073b5321/">💼 LinkedIn</a>
 </td>
+
 <td align="center">
-<img src="https://via.placeholder.com/150/3B82F6/FFFFFF?text=PM" width="120" height="120" style="border-radius:50%"/>
-<br />
-<strong>Prieyan MN</strong><br />
-<em>Frontend & Backend</em><br />
-<a href="https://github.com/PRIEYAN">🔗 GitHub</a> • 
-<a href="https://linkedin.com/in/prieyan-mn">💼 LinkedIn</a>
+<strong>Prieyan MN</strong><br/>
+<em>Full-Stack Developer & DevOps</em><br/>
+<a href="https://github.com/PRIEYAN">🔗 GitHub</a> |
+<a href="https://linkedin.com/in/prieyanmn">💼 LinkedIn</a>
 </td>
+
 </tr>
 <tr>
+
 <td align="center">
-<img src="https://via.placeholder.com/150/22C55E/FFFFFF?text=RS" width="120" height="120" style="border-radius:50%"/>
-<br />
-<strong>Rithika Sri</strong><br />
-<em>UI/UX Designer</em><br />
-<a href="https://github.com/rithika-sri">🔗 GitHub</a> • 
-<a href="https://linkedin.com/in/rithika-sri">💼 LinkedIn</a>
+<strong>Rithika Sri</strong><br/>
+<em>UI / UX Designer — Experience & Research</em><br/>
+<a href="https://github.com/rithika-sri">🔗 GitHub</a> |
+<a href="https://www.linkedin.com/">💼 LinkedIn</a>
 </td>
+
 <td align="center">
-<img src="https://via.placeholder.com/150/FF6B35/FFFFFF?text=MO" width="120" height="120" style="border-radius:50%"/>
-<br />
-<strong>Monish</strong><br />
-<em>AI/ML Engineer</em><br />
-<a href="https://github.com/monish">🔗 GitHub</a> • 
+<strong>Monish</strong><br/>
+<em>AI / ML Engineer — Predictive Analytics</em><br/>
+<a href="https://github.com/monish">🔗 GitHub</a> |
 <a href="https://linkedin.com/in/monish">💼 LinkedIn</a>
 </td>
+
 </tr>
 <tr>
+
 <td align="center" colspan="2">
-<img src="https://via.placeholder.com/150/4285F4/FFFFFF?text=DK" width="120" height="120" style="border-radius:50%"/>
-<br />
-<strong>Dinesh Kumar</strong><br />
-<em>Backend & Architecture</em><br />
-<a href="https://github.com/dinesh-kumar">🔗 GitHub</a> • 
-<a href="https://linkedin.com/in/dinesh-kumar">💼 LinkedIn</a>
+<strong>Dinesh Kumar</strong><br/>
+<em>Backend Engineer — System Architecture</em><br/>
+<a href="https://github.com/dineshkumarAS-creator">🔗 GitHub</a> |
+<a href="https://www.linkedin.com/in/dinesh-kumar-as-3049a8277/">💼 LinkedIn</a>
 </td>
+
 </tr>
 </table>
+
+<br>
+
+⭐ Together, we build scalable, intelligent, and real-world logistics solutions.
 
 </div>
 
@@ -553,15 +580,6 @@ ML models and AI services for route optimization and document processing.
 
 ---
 
-## 📄 License
-
-This project is **proprietary** and confidential. All rights reserved.
-
-**Copyright © 2025 YONKONS**
-
-Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited without express written permission from the copyright holders.
-
----
 
 ## 🙏 Acknowledgments
 
