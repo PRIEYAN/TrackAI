@@ -120,6 +120,8 @@ graph TB
         C[Flask REST API<br/>Python]
         D[MongoDB Atlas<br/>Database]
         E[Supabase Storage<br/>File Storage]
+        K[Redis<br/>Cache & Sessions]
+        L[BullMQ<br/>Job Queue]
     end
     
     subgraph "AI Services"
@@ -137,6 +139,8 @@ graph TB
     B -->|HTTPS/REST| C
     C -->|CRUD Operations| D
     C -->|File Upload/Download| E
+    C -->|Cache & Sessions| K
+    C -->|Job Queue| L
     C -->|AI Requests| F
     C -->|Route Calculation| G
     C -->|Integration| H
@@ -150,6 +154,8 @@ graph TB
     style E fill:#3ECF8E,color:#fff
     style F fill:#4285F4,color:#fff
     style G fill:#FF6B35,color:#fff
+    style K fill:#DC382D,color:#fff
+    style L fill:#F59E0B,color:#fff
 ```
 
 ### Component Architecture
@@ -177,6 +183,12 @@ graph TB
 │  │   MongoDB   │    │  Supabase       │   │  AI Services │ │
 │  │   Database  │    │  Storage        │   │  (Gemini)    │ │
 │  └─────────────┘    └─────────────────┘   └──────────────┘ │
+│                                                               │
+│  ┌──────────────┐    ┌──────────────────────────────────┐  │
+│  │    Redis     │    │         BullMQ                    │  │
+│  │  Cache &     │    │      Job Queue                    │  │
+│  │  Sessions    │    │   Background Tasks                │  │
+│  └──────────────┘    └──────────────────────────────────┘  │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │              Driver Mobile App (Flutter)                │ │
@@ -237,6 +249,11 @@ graph TB
 
 - **MongoDB Atlas**: Primary database for all application data
 - **Supabase Storage**: Cloud storage for documents and media files
+
+### Infrastructure Services
+
+- **Redis**: In-memory data store for caching, session management, and rate limiting
+- **BullMQ**: Distributed job queue system for background task processing and async operations
 
 ### AI Services
 
@@ -335,6 +352,8 @@ Requestly helped us quickly test flows such as:
 - `google-generativeai` - AI integration
 - `bcrypt` - Password hashing
 - `Flask-CORS` - Cross-origin support
+- `redis` - Redis client for caching and sessions
+- `bullmq` - Job queue for background tasks
 
 ### Database & Storage
 
@@ -347,6 +366,21 @@ Requestly helped us quickly test flows such as:
 <td align="center" width="150">
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/supabase/supabase-original.svg" width="48" height="48" alt="Supabase" />
 <br /><strong>Supabase</strong><br />Storage
+</td>
+</tr>
+</table>
+
+### Infrastructure Services
+
+<table>
+<tr>
+<td align="center" width="150">
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" width="48" height="48" alt="Redis" />
+<br /><strong>Redis</strong><br />Cache & Sessions
+</td>
+<td align="center" width="150">
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original.svg" width="48" height="48" alt="BullMQ" />
+<br /><strong>BullMQ</strong><br />Job Queue
 </td>
 </tr>
 </table>
@@ -377,6 +411,8 @@ Requestly helped us quickly test flows such as:
 - **Python**: 3.13+
 - **MongoDB Atlas**: Account and cluster
 - **Supabase**: Account and project
+- **Redis**: Redis server (local or cloud instance)
+- **BullMQ**: Job queue service (requires Redis)
 - **Google AI**: Gemini API key
 - **Android Studio** / **VS Code** with Flutter extension
 
@@ -456,6 +492,9 @@ STORAGE_BUCKET=documents
 # AI
 GEMINI_API_KEY=your-gemini-api-key
 
+# Redis & Queue
+REDIS_URL=redis://localhost:6379/0
+
 # CORS (optional)
 CORS_ORIGINS=*
 ```
@@ -471,6 +510,35 @@ flask run --host=0.0.0.0 --port=8000
 ```
 
 The API will be available at `http://localhost:8000`
+
+### Redis & BullMQ Setup
+
+**Redis Installation:**
+
+```bash
+# Using Docker (recommended)
+docker run -d -p 6379:6379 redis:latest
+
+# Or install locally
+# Ubuntu/Debian
+sudo apt-get install redis-server
+
+# macOS
+brew install redis
+brew services start redis
+```
+
+**BullMQ Configuration:**
+
+BullMQ uses Redis as its backend. Once Redis is running, BullMQ will automatically connect using the `REDIS_URL` environment variable.
+
+**Verify Redis Connection:**
+
+```bash
+# Test Redis connection
+redis-cli ping
+# Should return: PONG
+```
 
 ### Database Setup
 
