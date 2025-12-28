@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../services/api_service.dart';
 import '../../models/models.dart';
+import 'driver_assignment_view.dart';
 
 class AcceptedRequestsView extends StatefulWidget {
   const AcceptedRequestsView({super.key});
@@ -139,11 +140,31 @@ class _AcceptedQuoteCard extends StatelessWidget {
 
   const _AcceptedQuoteCard({required this.quote});
 
+  Future<void> _navigateToDriverAssignment(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DriverAssignmentView(shipment: quote),
+      ),
+    );
+    
+    // Refresh the list if driver was assigned successfully
+    if (result == true && context.mounted) {
+      // Trigger refresh in parent widget if needed
+      // The parent widget can handle this via a callback or state management
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => _navigateToDriverAssignment(context),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -210,66 +231,97 @@ class _AcceptedQuoteCard extends StatelessWidget {
             // Supplier Information
             if (quote.supplierDetails != null) ...[
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: AppConstants.primaryColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppConstants.primaryColor.withOpacity(0.2)),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppConstants.primaryColor.withOpacity(0.1),
+                      AppConstants.primaryColorLight.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppConstants.primaryColor.withOpacity(0.3),
+                    width: 1.5,
+                  ),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppConstants.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: AppConstants.primaryColor,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Supplier',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppConstants.primaryColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            quote.supplierDetails!['name'] ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: AppConstants.primaryColor,
+                            size: 28,
                           ),
-                          if (quote.supplierDetails!['phone'] != null) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(Icons.phone, size: 14, color: Colors.grey[600]),
-                                const SizedBox(width: 4),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Supplier Details',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                quote.supplierDetails!['name'] ?? 'N/A',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppConstants.textPrimary,
+                                ),
+                              ),
+                              if (quote.supplierDetails!['company_name'] != null && 
+                                  quote.supplierDetails!['company_name'].toString().isNotEmpty) ...[
+                                const SizedBox(height: 4),
                                 Text(
-                                  quote.supplierDetails!['phone'],
+                                  quote.supplierDetails!['company_name'],
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey[700],
+                                    color: Colors.grey[600],
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ],
-                            ),
-                          ],
-                        ],
-                      ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+                    if (quote.supplierDetails!['phone'] != null || 
+                        quote.supplierDetails!['email'] != null) ...[
+                      const Divider(height: 1),
+                      const SizedBox(height: 12),
+                      if (quote.supplierDetails!['phone'] != null)
+                        _buildContactInfo(
+                          Icons.phone_rounded,
+                          quote.supplierDetails!['phone'],
+                        ),
+                      if (quote.supplierDetails!['email'] != null) ...[
+                        const SizedBox(height: 10),
+                        _buildContactInfo(
+                          Icons.email_rounded,
+                          quote.supplierDetails!['email'],
+                        ),
+                      ],
+                    ],
                   ],
                 ),
               ),
@@ -446,6 +498,8 @@ class _AcceptedQuoteCard extends StatelessWidget {
           ],
         ),
       ),
+      ),
+      ),
     );
   }
 
@@ -500,6 +554,25 @@ class _AcceptedQuoteCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContactInfo(IconData icon, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppConstants.primaryColor),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: AppConstants.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

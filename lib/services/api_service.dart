@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../core/constants.dart';
 import '../core/auth_storage.dart';
 import '../models/models.dart';
+import '../models/driver.dart';
 
 class ApiService {
   final String baseUrl = AppConstants.baseUrl;
@@ -51,7 +52,11 @@ class ApiService {
     final response = await http.Response.fromStream(streamedResponse);
     
     if (response.statusCode == 201 || response.statusCode == 200) {
-      return Shipment.fromJson(json.decode(response.body));
+      final responseData = json.decode(response.body);
+      final shipmentData = responseData is Map && responseData.containsKey('data')
+          ? responseData['data']
+          : responseData;
+      return Shipment.fromJson(shipmentData);
     } else {
       final errorBody = response.body.isNotEmpty 
           ? json.decode(response.body) 
@@ -197,6 +202,50 @@ class ApiService {
     }
   }
 
+  Future<List<Driver>> getDrivers() async {
+    final headers = await _getHeaders();
+    final response = await http.get(
+      Uri.parse('$baseUrl/forwarder/show-drivers'),
+      headers: headers,
+    );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      List data = responseData is Map && responseData.containsKey('data') 
+          ? responseData['data'] 
+          : responseData is List 
+              ? responseData 
+              : [];
+      return data.map((item) => Driver.fromJson(item)).toList();
+    } else {
+      return [];
+    }
+  }
+
+  Future<void> assignDriver(String shipmentId, String driverId) async {
+    final headers = await _getHeaders();
+    final response = await http.put(
+      Uri.parse('$baseUrl/forwarder/assign-driver/$shipmentId/$driverId'),
+      headers: headers,
+    );
+    
+    if (response.statusCode == 200) {
+      // Backend returns success - data might be wrapped in 'data' key or returned directly
+      return; // Success
+    }
+    
+    // Handle error
+    final errorBody = response.statusCode >= 400
+        ? response.body.isNotEmpty
+            ? json.decode(response.body)
+            : <String, dynamic>{}
+        : <String, dynamic>{};
+    final errorMessage = errorBody['reason'] ?? 
+                        errorBody['detail'] ?? 
+                        errorBody['message'] ?? 
+                        'Failed to assign driver';
+    throw Exception(errorMessage);
+  }
+
   Future<Map<String, dynamic>> uploadDocument(String filePath) async {
     final token = await AuthStorage.getToken();
     var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/documents/upload'));
@@ -212,6 +261,41 @@ class ApiService {
       return json.decode(response.body);
     } else {
       throw Exception('Document upload failed');
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadInvoice(String shipmentId, String filePath) async {
+    final token = await AuthStorage.getToken();
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/documents/uploadInvoice'),
+    );
+    
+    if (token != null) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+    
+    request.fields['shipment_id'] = shipmentId;
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+    
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = json.decode(response.body);
+      if (responseData is Map && responseData.containsKey('message')) {
+        return responseData['message'] as Map<String, dynamic>;
+      }
+      return responseData as Map<String, dynamic>;
+    } else {
+      final errorBody = response.body.isNotEmpty
+          ? json.decode(response.body)
+          : <String, dynamic>{};
+      final errorMessage = errorBody['reason'] ??
+          errorBody['detail'] ??
+          errorBody['message'] ??
+          'Failed to upload invoice';
+      throw Exception(errorMessage);
     }
   }
 }

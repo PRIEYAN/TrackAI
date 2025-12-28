@@ -48,15 +48,17 @@ class ShipmentProvider with ChangeNotifier {
     }
   }
 
-  Future<void> createShipment(Map<String, dynamic> data) async {
+  Future<Shipment> createShipment(Map<String, dynamic> data) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final newShipment = await _apiService.createShipment(data);
       _shipments.insert(0, newShipment);
+      return newShipment;
     } catch (e) {
       _error = e.toString();
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

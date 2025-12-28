@@ -74,7 +74,7 @@ class _PaymentGatewayPopupState extends State<PaymentGatewayPopup> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Test Mode',
+                          'Razor pay Test mode',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 14,

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String baseUrl = 'https://cfca903e17c7.ngrok-free.app/api'; // Update for production
+  static const String baseUrl = 'http://localhost:8000/api'; // Update for production
+  // For Android emulator, use: http://10.0.2.2:8000/api
+  // For iOS simulator, use: http://localhost:8000/api
+  // For physical device, use your computer's IP: http://YOUR_IP:8000/api
+  // Or use ngrok: https://your-ngrok-url.ngrok-free.app/api
   
   // Theme Colors - Enhanced Blue Palette
   static const Color primaryColor = Color(0xFF1E3A8A); // Deep Blue
